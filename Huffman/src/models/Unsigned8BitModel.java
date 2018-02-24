@@ -19,7 +19,7 @@ public class Unsigned8BitModel implements SourceModel {
 		public int getValue() {
 			return _value;
 		}
-
+		
 		@Override
 		public int compareTo(Symbol o) {
 			if (!(o instanceof Unsigned8BitSymbol)) {
@@ -34,7 +34,7 @@ public class Unsigned8BitModel implements SourceModel {
 				return 0;
 			}
 		}
-
+		
 		@Override
 		public boolean equals(Object o) {
 			if (!(o instanceof Symbol)) {
@@ -42,31 +42,31 @@ public class Unsigned8BitModel implements SourceModel {
 			}
 			return (compareTo((Symbol) o) == 0);
 		}
-
+		
 		@Override
 		public int hashCode() {
 			return getValue();
 		}
-
+		
 		@Override
 		public String toString() {
 			return "" + getValue();
-
+				
 		}
-
+		
 	}
-
+	
 	public class Unsigned8BitSymbolModel implements SymbolModel {
 		private Unsigned8BitSymbol _symbol;
 		private long _count;
 		private Unsigned8BitModel _model;
-
+		
 		public Unsigned8BitSymbolModel(int value, long init_count, Unsigned8BitModel model) {
 			_symbol = new Unsigned8BitSymbol(value);
 			_count = init_count;
 			_model = model;
 		}
-
+		
 		public void incrementCount() {
 			_count++;
 		}
@@ -81,7 +81,7 @@ public class Unsigned8BitModel implements SourceModel {
 			return _symbol;
 		}
 	}
-
+	
 	private Unsigned8BitSymbolModel[] _values;
 	private long _count_total;
 
@@ -97,7 +97,7 @@ public class Unsigned8BitModel implements SourceModel {
 		return _count_total;
 	}
 
-	public void train(InputStream src, long input_count)
+	public void train(InputStream src, long input_count) 
 			throws IOException
 	{
 		while (input_count > 0) {
@@ -106,7 +106,7 @@ public class Unsigned8BitModel implements SourceModel {
 			input_count--;
 		}
 	}
-
+	
 	public void train(int value) {
 		_values[value].incrementCount();
 		_count_total++;
