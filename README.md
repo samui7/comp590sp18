@@ -2,3 +2,5 @@
 
 This code is a framework for developing programming assignments / projects for COMP 590 - Special Topics on Data Compression taught at UNC, Spring 2018.
 
+## Huffman
+Refer to [BUILD.md](Huffman/BUILD.md)
