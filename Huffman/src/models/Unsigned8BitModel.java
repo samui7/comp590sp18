@@ -80,6 +80,10 @@ public class Unsigned8BitModel implements SourceModel {
 		public Symbol getSymbol() {
 			return _symbol;
 		}
+
+		public long getCount() {
+			return _count;
+		}
 	}
 	
 	private Unsigned8BitSymbolModel[] _values;
@@ -91,6 +95,15 @@ public class Unsigned8BitModel implements SourceModel {
 			_values[v] = new Unsigned8BitSymbolModel(v, 1, this);
 		}
 		_count_total = 256;
+	}
+	
+	public Unsigned8BitModel(long[] counts) {
+		_values = new Unsigned8BitSymbolModel[256];
+		_count_total = 0;
+		for (int v=0; v<256; v++) {
+			_values[v] = new Unsigned8BitSymbolModel(v, counts[v], this);
+			_count_total += counts[v];
+		}
 	}
 
 	public long getCountTotal() {
@@ -114,7 +127,7 @@ public class Unsigned8BitModel implements SourceModel {
 
 	@Override
 	public int getSymbolCount() {
-		return 256;
+		return _values.length;
 	}
 
 	@Override
