@@ -6,7 +6,7 @@ import models.Symbol;
 import io.BitSource;
 import io.InsufficientBitsLeftException;
 
-public class HuffmanDecoder {
+public class HuffmanDecoder implements SymbolDecoder {
 
 	private HDNode _root;
 	
@@ -35,6 +35,10 @@ public class HuffmanDecoder {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see codec.SymbolDecoder#decode(io.BitSource)
+	 */
+	@Override
 	public Symbol decode(BitSource bit_source) throws InsufficientBitsLeftException, IOException {
 		HDNode node = _root;
 		

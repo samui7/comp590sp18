@@ -15,7 +15,7 @@ import models.SymbolModel;
 import io.BitSink;
 
 
-public class HuffmanEncoder {
+public class HuffmanEncoder implements SymbolEncoder {
 
 	private Map<Symbol, String> _code_map;
 
@@ -31,6 +31,7 @@ public class HuffmanEncoder {
 		return _code_map;
 	}
 
+	@Override
 	public void encode(Symbol s, BitSink out) throws IOException {
 		if (_code_map.containsKey(s)) {
 			out.write(_code_map.get(s));
