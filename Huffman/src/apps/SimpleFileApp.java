@@ -9,8 +9,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
+import codec.ArithmeticDecoder;
+import codec.ArithmeticEncoder;
 import codec.HuffmanDecoder;
 import codec.HuffmanEncoder;
+import codec.SymbolDecoder;
+import codec.SymbolEncoder;
 import io.BitSink;
 import io.BitSource;
 import io.InputStreamBitSource;
@@ -26,7 +30,7 @@ public class SimpleFileApp {
 	public static void main(String[] args) 
 			throws FileNotFoundException, IOException
 		{
-			String filename="/Users/kmp/tmp/pinwheel.450p.yuv";
+			String filename="/Users/kmp/tmp/test.csv";
 			File file = new File(filename);
 			long length = file.length();
 			InputStream training_values = new FileInputStream(file);
@@ -38,8 +42,10 @@ public class SimpleFileApp {
 			System.out.println("Model symbol count: " + model.getSymbolCount());
 			System.out.println("Model count total: " + model.getCountTotal());
 
-			HuffmanEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
-			Map<Symbol, String> code_map = encoder.getCodeMap();
+			
+			SymbolEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
+			
+			Map<Symbol, String> code_map = ((HuffmanEncoder) encoder).getCodeMap();
 			
 			Symbol[] symbols = new Unsigned8BitSymbol[256];
 			for (int v=0; v<256; v++) {
@@ -53,7 +59,7 @@ public class SimpleFileApp {
 
 			InputStream message = new FileInputStream(file);
 			
-			File out_file = new File("/Users/kmp/tmp/pinwheel-blackbox-compressed.dat");
+			File out_file = new File("/Users/kmp/tmp/test-compressed.dat");
 			OutputStream out_stream = new FileOutputStream(out_file);
 			BitSink bit_sink = new OutputStreamBitSink(out_stream);
 			
@@ -65,18 +71,20 @@ public class SimpleFileApp {
 			}
 			
 			message.close();
-			bit_sink.padToWord();
+			
+			encoder.close(bit_sink);
+
 			out_stream.close();
 			
 			System.out.println("Done compressing");
 			
 			BitSource bit_source = new InputStreamBitSource(new FileInputStream(out_file));
-			OutputStream decoded_file = new FileOutputStream(new File("/Users/kmp/tmp/pinwheel-blackbox-decompressed.dat"));
+			OutputStream decoded_file = new FileOutputStream(new File("/Users/kmp/tmp/test-decompressed.dat"));
 			
-			HuffmanDecoder decoder = new HuffmanDecoder(encoder.getCodeMap());
+			SymbolDecoder decoder = new HuffmanDecoder(((HuffmanEncoder) encoder).getCodeMap());
+			
 			int num_decoded = 0;
 			while (num_decoded < length) {
-//			while (true) {
 				try {
 					Symbol sym = decoder.decode(bit_source);
 					decoded_file.write(((Unsigned8BitSymbol) sym).getValue());
@@ -86,8 +94,7 @@ public class SimpleFileApp {
 					break;
 				}
 			}
-			decoded_file.close();
-			
+			decoded_file.close();			
 		}
 
 }
