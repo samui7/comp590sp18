@@ -25,31 +25,33 @@ public class InputStreamBitSource implements BitSource {
 			return 0;
 		}
 
-		int overflow = 0x0;
-		int num_bits_in_overflow = 0;
-
-		while (_available < count) {
-			int bits_from_stream = _stream.read();
-			if (bits_from_stream == -1) {
-				throw new InsufficientBitsLeftException(_available);
-			}
-
-			if (_available > 24) {
-				overflow = ((_buffer >> 24) & 0xff);
-				num_bits_in_overflow = _available%24;				
-			}
-
-			_buffer = ((_buffer << 8) | bits_from_stream);
-			_available += 8;
+		if (_available == 0) {
+			_buffer = 0x0;
+			while (_available < count) {
+				// Refill buffer.
+				int next_byte_from_stream = _stream.read();
+				if (next_byte_from_stream == -1) {
+					throw new InsufficientBitsLeftException(_available);				
+				}
+				_buffer = ((_buffer << 8) | next_byte_from_stream);
+				_available += 8;
+			}			
 		}
-
-		// If there are bits in the overflow, then we know they will be part of the result.
-		int next_bits = overflow;
-		next_bits <<= (count - num_bits_in_overflow);
-		next_bits |= ((_buffer >> (_available - (count-num_bits_in_overflow))) &
-					  (~(0xffffffff << (count-num_bits_in_overflow))));
-		_available -= count;
 		
-		return next_bits;
+		if (_available < count) {
+			int part_a_count = _available;
+			int part_b_count = (count - _available);
+			int part_a = next(part_a_count);
+			int part_b = next(part_b_count);
+			return ((part_a << part_b_count) | part_b);
+		} else {
+			int bits_from_buffer = (_buffer >> (_available - count));
+			int bits_from_buffer_mask = 0xffffffff;
+			if (count < 32) {
+				bits_from_buffer_mask = ~(bits_from_buffer_mask << count);
+			}
+			_available -= count;
+			return bits_from_buffer & bits_from_buffer_mask;
+		}
 	}
 }
