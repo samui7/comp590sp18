@@ -11,6 +11,8 @@ import java.util.Map;
 
 import models.Unsigned8BitModel;
 import codec.HuffmanEncoder;
+import codec.SymbolDecoder;
+import codec.SymbolEncoder;
 import models.Symbol;
 import models.SymbolModel;
 import models.Unsigned8BitModel.Unsigned8BitSymbol;
@@ -46,8 +48,8 @@ public class VideoApp {
 		}
 		training_values.close();		
 
-		HuffmanEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
-		Map<Symbol, String> code_map = encoder.getCodeMap();
+		SymbolEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
+		Map<Symbol, String> code_map = ((HuffmanEncoder) encoder).getCodeMap();
 
 		Symbol[] symbols = new Unsigned8BitSymbol[256];
 		for (int v=0; v<256; v++) {
@@ -77,13 +79,13 @@ public class VideoApp {
 		}
 
 		message.close();
-		bit_sink.padToWord();
+		encoder.close(bit_sink);
 		out_stream.close();
 
 		BitSource bit_source = new InputStreamBitSource(new FileInputStream(out_file));
 		OutputStream decoded_file = new FileOutputStream(new File("/Users/kmp/tmp/" + base + "-decoded.dat"));
 
-		HuffmanDecoder decoder = new HuffmanDecoder(encoder.getCodeMap());
+		SymbolDecoder decoder = new HuffmanDecoder(((HuffmanEncoder) encoder).getCodeMap());
 
 		current_frame = new int[width][height];
 
@@ -134,7 +136,7 @@ public class VideoApp {
 		}
 	}
 	
-	private static void encodeFrameDifference(int[][] frame, HuffmanEncoder encoder, BitSink bit_sink, Symbol[] symbols) 
+	private static void encodeFrameDifference(int[][] frame, SymbolEncoder encoder, BitSink bit_sink, Symbol[] symbols) 
 			throws IOException {
 
 		int width = frame.length;
@@ -147,7 +149,7 @@ public class VideoApp {
 		}
 	}
 
-	private static int[][] decodeFrame(HuffmanDecoder decoder, BitSource bit_source, int width, int height) 
+	private static int[][] decodeFrame(SymbolDecoder decoder, BitSource bit_source, int width, int height) 
 			throws InsufficientBitsLeftException, IOException {
 		int[][] frame = new int[width][height];
 		for (int y=0; y<height; y++) {
