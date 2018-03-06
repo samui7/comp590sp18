@@ -18,13 +18,15 @@ import io.BitSink;
 public class HuffmanEncoder implements SymbolEncoder {
 
 	private Map<Symbol, String> _code_map;
-
+	private boolean _closed;
+	
 	public HuffmanEncoder(Map<Symbol, String> code_map) {
 		_code_map = code_map;
+		_closed = false;
 	}
 
 	public HuffmanEncoder(SourceModel source_model, long precision) {
-		_code_map = createCodeMapFromModel(source_model, precision);
+		this(createCodeMapFromModel(source_model, precision));
 	}
 
 	public Map<Symbol, String> getCodeMap() {
@@ -33,11 +35,21 @@ public class HuffmanEncoder implements SymbolEncoder {
 
 	@Override
 	public void encode(Symbol s, BitSink out) throws IOException {
+		if (_closed) {
+			throw new RuntimeException("Attempt to encode symbol on closed encoder");
+		}
+		
 		if (_code_map.containsKey(s)) {
 			out.write(_code_map.get(s));
 		} else {
 			throw new RuntimeException("Symbol not in code map");
 		}
+	}
+
+	@Override
+	public void close(BitSink out) throws IOException {
+		out.padToWord();
+		_closed = true;
 	}
 
 	public static Map<Symbol, String> createCodeMapFromModel(SourceModel m, long precision) {
@@ -78,6 +90,7 @@ public class HuffmanEncoder implements SymbolEncoder {
 		root.addCodesToMap("", code_map);
 		return code_map;
 	}
+
 }
 
 abstract class HENode {

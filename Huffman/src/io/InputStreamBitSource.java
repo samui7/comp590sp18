@@ -26,9 +26,9 @@ public class InputStreamBitSource implements BitSource {
 		}
 
 		if (_available == 0) {
+			// Refill buffer. 
 			_buffer = 0x0;
 			while (_available < count) {
-				// Refill buffer.
 				int next_byte_from_stream = _stream.read();
 				if (next_byte_from_stream == -1) {
 					throw new InsufficientBitsLeftException(_available);				

@@ -8,6 +8,9 @@ import models.Symbol;
 
 public interface SymbolDecoder {
 
+	/* decode
+	 * Decodes next symbol from bit source provided.
+	 */
 	Symbol decode(BitSource bit_source) throws InsufficientBitsLeftException, IOException;
 
 }
