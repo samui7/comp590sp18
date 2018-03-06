@@ -19,6 +19,8 @@ import models.Unsigned8BitModel.Unsigned8BitSymbol;
 import io.InsufficientBitsLeftException;
 import io.BitSink;
 import io.BitSource;
+import codec.ArithmeticDecoder;
+import codec.ArithmeticEncoder;
 import codec.HuffmanDecoder;
 import io.InputStreamBitSource;
 import io.OutputStreamBitSink;
@@ -26,12 +28,13 @@ import io.OutputStreamBitSink;
 public class VideoApp {
 
 	public static void main(String[] args) throws IOException, InsufficientBitsLeftException {
-		String base = "pinwheel";
+		String base = "bunny";
 		String filename="/Users/kmp/tmp/" + base + ".450p.yuv";
 		File file = new File(filename);
 		int width = 800;
 		int height = 450;
 		int num_frames = 150;
+
 
 		Unsigned8BitModel model = new Unsigned8BitModel();
 
@@ -48,8 +51,10 @@ public class VideoApp {
 		}
 		training_values.close();		
 
-		SymbolEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
-		Map<Symbol, String> code_map = ((HuffmanEncoder) encoder).getCodeMap();
+		//		HuffmanEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
+		//		Map<Symbol, String> code_map = encoder.getCodeMap();
+
+		SymbolEncoder encoder = new ArithmeticEncoder(model);
 
 		Symbol[] symbols = new Unsigned8BitSymbol[256];
 		for (int v=0; v<256; v++) {
@@ -58,7 +63,7 @@ public class VideoApp {
 			symbols[v] = sym;
 
 			long prob = s.getProbability(model.getCountTotal());
-			System.out.println("Symbol: " + sym + " probability: " + prob + "/" + model.getCountTotal() + " code: " + code_map.get(sym));
+			System.out.println("Symbol: " + sym + " probability: " + prob + "/" + model.getCountTotal());
 		}			
 
 		InputStream message = new FileInputStream(file);
@@ -85,7 +90,8 @@ public class VideoApp {
 		BitSource bit_source = new InputStreamBitSource(new FileInputStream(out_file));
 		OutputStream decoded_file = new FileOutputStream(new File("/Users/kmp/tmp/" + base + "-decoded.dat"));
 
-		SymbolDecoder decoder = new HuffmanDecoder(((HuffmanEncoder) encoder).getCodeMap());
+		//		SymbolDecoder decoder = new HuffmanDecoder(encoder.getCodeMap());
+		SymbolDecoder decoder = new ArithmeticDecoder(model);
 
 		current_frame = new int[width][height];
 
@@ -98,9 +104,9 @@ public class VideoApp {
 		}
 
 		decoded_file.close();
-		
+
 	}
-	
+
 	private static int[][] readFrame(InputStream src, int width, int height) 
 			throws IOException {
 		int[][] frame_data = new int[width][height];
@@ -135,7 +141,7 @@ public class VideoApp {
 			}
 		}
 	}
-	
+
 	private static void encodeFrameDifference(int[][] frame, SymbolEncoder encoder, BitSink bit_sink, Symbol[] symbols) 
 			throws IOException {
 
