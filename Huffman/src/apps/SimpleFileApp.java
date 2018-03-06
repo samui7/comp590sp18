@@ -43,9 +43,10 @@ public class SimpleFileApp {
 			System.out.println("Model count total: " + model.getCountTotal());
 
 			
-			SymbolEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
+//			SymbolEncoder encoder = new HuffmanEncoder(model, model.getCountTotal());
+			SymbolEncoder encoder = new ArithmeticEncoder(model);
 			
-			Map<Symbol, String> code_map = ((HuffmanEncoder) encoder).getCodeMap();
+//			Map<Symbol, String> code_map = ((HuffmanEncoder) encoder).getCodeMap();
 			
 			Symbol[] symbols = new Unsigned8BitSymbol[256];
 			for (int v=0; v<256; v++) {
@@ -54,7 +55,8 @@ public class SimpleFileApp {
 				symbols[v] = sym;
 
 				long prob = s.getProbability(model.getCountTotal());
-				System.out.println("Symbol: " + sym + " probability: " + prob + "/" + model.getCountTotal() + " code: " + code_map.get(sym));
+//				System.out.println("Symbol: " + sym + " probability: " + prob + "/" + model.getCountTotal() + " code: " + code_map.get(sym));
+				System.out.println("Symbol: " + sym + " probability: " + prob + "/" + model.getCountTotal());
 			}
 
 			InputStream message = new FileInputStream(file);
@@ -81,7 +83,8 @@ public class SimpleFileApp {
 			BitSource bit_source = new InputStreamBitSource(new FileInputStream(out_file));
 			OutputStream decoded_file = new FileOutputStream(new File("/Users/kmp/tmp/test-decompressed.dat"));
 			
-			SymbolDecoder decoder = new HuffmanDecoder(((HuffmanEncoder) encoder).getCodeMap());
+//			SymbolDecoder decoder = new HuffmanDecoder(((HuffmanEncoder) encoder).getCodeMap());
+			SymbolDecoder decoder = new ArithmeticDecoder(model);
 			
 			int num_decoded = 0;
 			while (num_decoded < length) {
